@@ -17,7 +17,7 @@ function App() {
     try {
       const res = await fetch(apiUrl, {
         // Use POST method to send the request body
-        method: 'GET',
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -25,7 +25,7 @@ function App() {
       });
 
       const data = await res.json();
-      console.log('Lambda Response:', data); 
+      console.log('Lambda Response:', data);
 
       // Set the response state to display it
       setResponse(JSON.stringify(data)); // Convert response to string for display
