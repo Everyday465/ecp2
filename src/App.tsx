@@ -6,7 +6,7 @@ function App() {
   // Lambda function async
   const callLambda = async () => {
     // Enter API URL here
-    const apiUrl = 'https://7ijq9dwucg.execute-api.us-east-1.amazonaws.com/dev';
+    const apiUrl = 'https://7ijq9dwucg.execute-api.us-east-1.amazonaws.com/dev/hello';
 
     // Enter JSON request body if needed
     const requestBody = JSON.stringify({
