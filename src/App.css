@@ -40,3 +40,31 @@
 .read-the-docs {
   color: #888;
 }
+
+/* css */
+
+body {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  margin-top: 50px;
+}
+button {
+  padding: 10px 20px;
+  margin: 10px;
+  font-size: 16px;
+  cursor: pointer;
+  border: none;
+  border-radius: 5px;
+}
+.btn1 {
+  background-color: #4CAF50;
+  color: white;
+}
+.btn2 {
+  background-color: #008CBA;
+  color: white;
+}
+.btn3 {
+  background-color: #f44336;
+  color: white;
+}

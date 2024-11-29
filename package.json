@@ -11,9 +11,10 @@
   },
   "dependencies": {
     "@aws-amplify/ui-react": "^6.5.5",
+    "@types/aws-lambda": "^8.10.146",
     "aws-amplify": "^6.6.6",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
   },
   "devDependencies": {
     "@aws-amplify/backend": "^1.5.0",
@@ -33,5 +34,10 @@
     "tsx": "^4.7.2",
     "typescript": "^5.4.5",
     "vite": "^5.4.10"
-  }
+  },
+  "description": "This repository provides a starter template for creating applications using React+Vite and AWS Amplify, emphasizing easy setup for authentication, API, and database capabilities.",
+  "main": "index.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
 }
