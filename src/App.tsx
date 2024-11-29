@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 function App() {
   const [response, setResponse] = useState('');
@@ -26,7 +26,7 @@ function App() {
 
       const data = await res.json();
       console.log('Lambda Response:', data);
-      
+
       // Set the response state to display it
       setResponse(JSON.stringify(data)); // Convert response to string for display
     } catch (error) {
