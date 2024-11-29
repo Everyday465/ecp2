@@ -36,7 +36,7 @@ function App() {
     try {
       const response = await fetch(apiUrl, {
         //GET/POST/PUT/DEL
-        method: 'POST',
+        method: 'GET',
         headers: {
           'Content-Type': 'application/json',
           //maybe need auth header
