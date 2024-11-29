@@ -1,10 +1,10 @@
+
 import React, { useState } from 'react';
 import axios from 'axios'; // Import Axios
 
 function App() {
   const [response, setResponse] = useState('');
 
-  // Lambda function async
   const callLambda = async () => {
     const apiUrl = 'https://7ijq9dwucg.execute-api.us-east-1.amazonaws.com/dev/hello';
     const requestBody = {
@@ -14,7 +14,7 @@ function App() {
 
     try {
       // Use Axios to make the POST request
-      const res = await axios.post(apiUrl, requestBody, {
+      const res = await axios.get(apiUrl, requestBody, {
         headers: {
           'Content-Type': 'application/json',
         },
@@ -46,6 +46,7 @@ function App() {
       </button>
 
       <p id="responseMessage">{response}</p>
+
     </div>
   );
 }
