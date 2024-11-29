@@ -25,8 +25,8 @@ function App() {
       });
 
       const data = await res.json();
-      console.log('Lambda Response:', data);
-      
+      console.log('Lambda Response:', data); 
+
       // Set the response state to display it
       setResponse(JSON.stringify(data)); // Convert response to string for display
     } catch (error) {
