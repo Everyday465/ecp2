@@ -1,33 +1,36 @@
-
-import React, { useState } from 'react';
-import axios from 'axios'; // Import Axios
+import { useState } from 'react';
 
 function App() {
   const [response, setResponse] = useState('');
 
+  // Lambda function async
   const callLambda = async () => {
-    const apiUrl = 'https://7ijq9dwucg.execute-api.us-east-1.amazonaws.com/dev/hello';
-    const requestBody = {
+    // Enter API URL here
+    const apiUrl = 'https://7ijq9dwucg.execute-api.us-east-1.amazonaws.com/dev';
+
+    // Enter JSON request body if needed
+    const requestBody = JSON.stringify({
       key1: 'value1',
       key2: 'value2',
-    };
+    });
 
     try {
-      // Use Axios to make the POST request
-      const res = await axios.get(apiUrl, requestBody, {
+      const res = await fetch(apiUrl, {
+        // Use POST method to send the request body
+        method: 'GET',
         headers: {
           'Content-Type': 'application/json',
         },
+        body: requestBody,
       });
 
-      // Axios automatically parses the JSON response, so no need for res.json()
-      console.log('Lambda Response:', res.data);
+      const data = await res.json();
+      console.log('Lambda Response:', data);
       
       // Set the response state to display it
-      setResponse(JSON.stringify(res.data)); // Convert response to string for display
+      setResponse(JSON.stringify(data)); // Convert response to string for display
     } catch (error) {
       console.error('Error calling Lambda:', error);
-      // Axios error handling is simple and automatic
       setResponse('Error calling Lambda: ' + error); // Display error message
     }
   };
@@ -46,7 +49,6 @@ function App() {
       </button>
 
       <p id="responseMessage">{response}</p>
-
     </div>
   );
 }
