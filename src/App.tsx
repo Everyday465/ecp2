@@ -2,25 +2,23 @@ import { useEffect, useState } from "react";
 import type { Schema } from "../amplify/data/resource";
 import { generateClient } from "aws-amplify/data";
 
-const client = generateClient<Schema>();
+//const client = generateClient<Schema>();
 
 function App() {
 
-  //template start
-  const [todos, setTodos] = useState<Array<Schema["Todo"]["type"]>>([]);
+  // //template start
+  // const [todos, setTodos] = useState<Array<Schema["Todo"]["type"]>>([]);
 
-  useEffect(() => {
-    client.models.Todo.observeQuery().subscribe({
-      next: (data) => setTodos([...data.items]),
-    });
-  }, []);
+  // useEffect(() => {
+  //   client.models.Todo.observeQuery().subscribe({
+  //     next: (data) => setTodos([...data.items]),
+  //   });
+  // }, []);
 
-  function createTodo() {
-    client.models.Todo.create({ content: window.prompt("Todo content") });
-  }
-  //template end
-
-  const [responseMessage, setResponseMessage] = useState<string>('');
+  // function createTodo() {
+  //   client.models.Todo.create({ content: window.prompt("Todo content") });
+  // }
+  // //template end
 
 //lamba funtion async
   const callLambda = async () => {
@@ -74,8 +72,6 @@ function App() {
       >
         Button 3
       </button>
-
-      <p id="responseMessage">{responseMessage}</p>
     </div>
     // <main>
     //   <h1>My todos</h1>
