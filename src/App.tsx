@@ -5,21 +5,23 @@ function App() {
 
   // Lambda function async
   const callLambda = async () => {
+
     const apiUrl = 'https://yjfs7k6xp9.execute-api.us-east-1.amazonaws.com/dev/'; // Updated API URL
 
     try {
       const res = await fetch(apiUrl, {
         method: 'GET', // GET request
+
         headers: {
           'Content-Type': 'application/json', // Optional for GET
         },
       });
-
       if (!res.ok) {
         throw new Error(`HTTP error! status: ${res.status}`);
       }
 
       const data = await res.json(); // Assuming the response is JSON
+
       console.log('Lambda Response:', data);
 
       // Set the response state to display it
