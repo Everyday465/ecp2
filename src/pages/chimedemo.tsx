@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import * as ChimeSDK from 'amazon-chime-sdk-js';
 
 const Chimedemo = () => {
@@ -35,7 +35,7 @@ const Chimedemo = () => {
         });
     };
 
-    const attendeeObserver = (attendeeId: string, present: boolean, externalUserId?: string) => {
+    const attendeeObserver = (_attendeeId: string, present: boolean, externalUserId?: string) => {
         const attendeeName = externalUserId?.split('#')[0] || 'Unknown User';
         setAttendees((prev) => {
             const updated = new Set(prev);
