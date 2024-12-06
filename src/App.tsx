@@ -6,7 +6,7 @@ function App() {
   // Lambda function async
   const callLambda = async () => {
 
-    const apiUrl = 'https://yjfs7k6xp9.execute-api.us-east-1.amazonaws.com/dev/'; // Updated API URL
+    const apiUrl = 'https://yjfs7k6xp9.execute-api.us-east-1.amazonaws.com/dev/Test'; // Updated API URL
 
     try {
       const res = await fetch(apiUrl, {
