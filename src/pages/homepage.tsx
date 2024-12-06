@@ -1,12 +1,11 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import { useNavigate } from 'react-router-dom';
 
 const homepage = () => {
     const [response, setResponse] = useState('');
-    const navigate = useNavigate(); // Initialize useNavigate
-
+    const navigate = useNavigate(); 
     const callLambda = async () => {
-        const apiUrl = 'https://yjfs7k6xp9.execute-api.us-east-1.amazonaws.com/dev/';
+        const apiUrl = 'https://yjfs7k6xp9.execute-api.us-east-1.amazonaws.com/dev/Test';
         try {
             const res = await fetch(apiUrl, {
                 method: 'GET',
@@ -32,7 +31,7 @@ const homepage = () => {
             <button className="btn1" onClick={callLambda}>
                 Call Lambda
             </button>
-            <button className="btn2" onClick={() => navigate('/chimedemo')}> {/* Navigate to Chimedemo */}
+            <button className="btn2" onClick={() => navigate('/chimedemo')}>
                 Go to Chimedemo
             </button>
             <button className="btn3" onClick={() => alert('Button 3 clicked!')}>
