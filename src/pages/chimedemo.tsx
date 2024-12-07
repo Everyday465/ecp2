@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import * as ChimeSDK from 'amazon-chime-sdk-js';
 
@@ -37,17 +36,15 @@ const ChimeDemo = () => {
     });
   };
 
-
-    const attendeeObserver = (_attendeeId: string, present: boolean, externalUserId?: string) => {
-        const attendeeName = externalUserId?.split('#')[0] || 'Unknown User';
-        setAttendees((prev) => {
-            const updated = new Set(prev);
-            if (present) updated.add(attendeeName);
-            else updated.delete(attendeeName);
-            return updated;
-        });
-    };
-
+  const attendeeObserver = (_attendeeId: string, present: boolean, externalUserId?: string) => {
+    const attendeeName = externalUserId?.split('#')[0] || 'Unknown User';
+    setAttendees((prev) => {
+      const updatedSet = new Set(prev);
+      if (present) updatedSet.add(attendeeName);
+      else updatedSet.delete(attendeeName);
+      return updatedSet;
+    });
+  };
 
   const joinMeeting = async () => {
     if (!userName.trim()) {
