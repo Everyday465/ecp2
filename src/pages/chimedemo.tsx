@@ -6,15 +6,14 @@ const ChimeDemo = () => {
   const [meetingSession, setMeetingSession] = useState<ChimeSDK.DefaultMeetingSession | null>(null);
   const [userName, setUserName] = useState<string>(''); 
   const [attendees, setAttendees] = useState<Set<string>>(new Set());
-  const [shareableLink, setShareableLink] = useState<string>(''); // State to store shareable meeting link
+  const [shareableLink, setShareableLink] = useState<string>(''); // State for shareable link
 
   const logger = new ChimeSDK.ConsoleLogger('ChimeMeetingLogs', ChimeSDK.LogLevel.INFO);
   const deviceController = new ChimeSDK.DefaultDeviceController(logger);
 
-  // Observer logic for updates in attendee video streams
   const handleVideoUpdates = () => {
     if (!meetingSession) return;
-    
+
     meetingSession.audioVideo.getAllVideoTiles().forEach(tile => {
       const tileState = tile.state();
       if (!tileState?.tileId) return;
@@ -46,6 +45,7 @@ const ChimeDemo = () => {
     });
   };
 
+  // Logic for joining meeting
   const joinMeeting = async () => {
     if (!userName.trim()) {
       alert('Please enter your name');
@@ -85,7 +85,7 @@ const ChimeDemo = () => {
 
       const audioDevices = await newMeetingSession.audioVideo.listAudioInputDevices();
       const videoDevices = await newMeetingSession.audioVideo.listVideoInputDevices();
-      
+
       if (audioDevices.length) await newMeetingSession.audioVideo.startAudioInput(audioDevices[0].deviceId);
       if (videoDevices.length) await newMeetingSession.audioVideo.startVideoInput(videoDevices[0].deviceId);
 
@@ -98,8 +98,6 @@ const ChimeDemo = () => {
       newMeetingSession.audioVideo.startLocalVideoTile();
 
       setResponse('Meeting started');
-      
-      // Capture and display the shareable link from backend response
       setShareableLink(data.Info.ShareableLink);
     } catch (error) {
       console.error('Error joining meeting:', error);
@@ -137,12 +135,12 @@ const ChimeDemo = () => {
         />
         <br />
         <button onClick={joinMeeting} style={{ marginRight: '10px' }}>
-          Start Meeting & Share Link
+          Join Meeting
         </button>
         <button onClick={cleanupMeeting}>Leave Meeting</button>
       </div>
       <p style={{ marginTop: '10px' }}>{response}</p>
-
+      
       {/* Shareable Meeting Link Section */}
       {shareableLink && (
         <div style={{ marginTop: '20px' }}>
