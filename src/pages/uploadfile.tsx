@@ -1,9 +1,6 @@
 import { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 
-interface UploadFileProps {
-  file: File;
-}
 
 const UploadFile = () => {
   const [files, setFiles] = useState<File[]>([]);
