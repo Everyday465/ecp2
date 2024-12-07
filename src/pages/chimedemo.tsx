@@ -1,139 +1,164 @@
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
 import * as ChimeSDK from 'amazon-chime-sdk-js';
 
-const Chimedemo = () => {
-    const [response, setResponse] = useState<string>('');
-    const [meetingId, setMeetingId] = useState<string>('');
-    const [userName, setUserName] = useState<string>('');
-    const [meetingSession, setMeetingSession] = useState<ChimeSDK.DefaultMeetingSession | null>(null);
-    const [attendees, setAttendees] = useState<Set<string>>(new Set());
+const ChimeDemo = () => {
+  const [response, setResponse] = useState<string>(''); 
+  const [meetingSession, setMeetingSession] = useState<ChimeSDK.DefaultMeetingSession | null>(null);
+  const [userName, setUserName] = useState<string>(''); 
+  const [attendees, setAttendees] = useState<Set<string>>(new Set());
+  const [shareableLink, setShareableLink] = useState<string>(''); // State to store shareable meeting link
 
-    const logger = new ChimeSDK.ConsoleLogger('ChimeMeetingLogs', ChimeSDK.LogLevel.INFO);
-    const deviceController = new ChimeSDK.DefaultDeviceController(logger);
+  const logger = new ChimeSDK.ConsoleLogger('ChimeMeetingLogs', ChimeSDK.LogLevel.INFO);
+  const deviceController = new ChimeSDK.DefaultDeviceController(logger);
 
-    const updateTiles = () => {
-        if (!meetingSession) return;
+  // Observer logic for updates in attendee video streams
+  const handleVideoUpdates = () => {
+    if (!meetingSession) return;
+    
+    meetingSession.audioVideo.getAllVideoTiles().forEach(tile => {
+      const tileState = tile.state();
+      if (!tileState?.tileId) return;
 
-        meetingSession.audioVideo.getAllVideoTiles().forEach((tile) => {
-            const tileState = tile.state();
-            const tileId = tileState.tileId;
-            if (!tileId) return;
+      let divElement = document.getElementById(`div-${tileState.tileId}`);
+      if (!divElement) {
+        divElement = document.createElement('div');
+        divElement.id = `div-${tileState.tileId}`;
+        const videoElement = document.createElement('video');
+        videoElement.id = `video-${tileState.tileId}`;
+        videoElement.autoplay = true;
+        videoElement.style.width = '300px';
+        videoElement.style.height = '200px';
+        divElement.appendChild(videoElement);
+        document.getElementById('video-list')?.appendChild(divElement);
 
-            let divElement = document.getElementById(`div-${tileId}`);
-            if (!divElement) {
-                divElement = document.createElement('div');
-                divElement.id = `div-${tileId}`;
-                const videoElement = document.createElement('video');
-                videoElement.id = `video-${tileId}`;
-                videoElement.autoplay = true;
-                videoElement.style.width = '300px';
-                videoElement.style.height = '200px';
-                divElement.appendChild(videoElement);
-                document.getElementById('video-list')?.appendChild(divElement);
-                meetingSession.audioVideo.bindVideoElement(tileId, videoElement);
-            }
-        });
-    };
+        meetingSession.audioVideo.bindVideoElement(tileState.tileId, videoElement);
+      }
+    });
+  };
 
-    const attendeeObserver = (attendeeId: string, present: boolean, externalUserId?: string) => {
-        const attendeeName = externalUserId?.split('#')[0] || 'Unknown User';
-        setAttendees((prev) => {
-            const updated = new Set(prev);
-            if (present) updated.add(attendeeName);
-            else updated.delete(attendeeName);
-            return updated;
-        });
-    };
+  const attendeeObserver = (_attendeeId: string, present: boolean, externalUserId?: string) => {
+    const attendeeName = externalUserId?.split('#')[0] || 'Unknown User';
+    setAttendees((prev) => {
+      const updatedSet = new Set(prev);
+      if (present) updatedSet.add(attendeeName);
+      else updatedSet.delete(attendeeName);
+      return updatedSet;
+    });
+  };
 
-    const doMeeting = async () => {
-        if (!userName.trim()) {
-            alert('Please enter your name');
-            return;
-        }
+  const joinMeeting = async () => {
+    if (!userName.trim()) {
+      alert('Please enter your name');
+      return;
+    }
 
-        if (userName.includes('#')) {
-            alert('Please do not use special characters in your name');
-            return;
-        }
+    if (userName.includes('#')) {
+      alert('Special characters like # are not allowed');
+      return;
+    }
 
-        if (meetingSession) return;
+    try {
+      const response = await fetch('https://yjfs7k6xp9.execute-api.us-east-1.amazonaws.com/dev/meetings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'DO_MEETING', USERNAME: userName }),
+      });
 
-        try {
-            const response = await fetch('https://yjfs7k6xp9.execute-api.us-east-1.amazonaws.com/dev/meetings', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'DO_MEETING', MEETING_ID: meetingId, USERNAME: userName }),
-            });
-            const data = await response.json();
+      const data = await response.json();
+      if (!data?.Info) {
+        alert('Failed to initialize meeting');
+        return;
+      }
 
-            if (!data.Info) {
-                alert('Oops! The meeting might have ended!');
-                return;
-            }
+      const sessionConfig = new ChimeSDK.MeetingSessionConfiguration(
+        data.Info.Meeting.Meeting,
+        data.Info.Attendee.Attendee
+      );
 
-            const meetingConfig = new ChimeSDK.MeetingSessionConfiguration(
-                data.Info.Meeting.Meeting,
-                data.Info.Attendee.Attendee
-            );
+      const newMeetingSession = new ChimeSDK.DefaultMeetingSession(
+        sessionConfig,
+        logger,
+        deviceController
+      );
 
-            const newMeetingSession = new ChimeSDK.DefaultMeetingSession(meetingConfig, logger, deviceController);
-            setMeetingSession(newMeetingSession);
+      setMeetingSession(newMeetingSession);
 
-            const audioInputs = await newMeetingSession.audioVideo.listAudioInputDevices();
-            const videoInputs = await newMeetingSession.audioVideo.listVideoInputDevices();
+      const audioDevices = await newMeetingSession.audioVideo.listAudioInputDevices();
+      const videoDevices = await newMeetingSession.audioVideo.listVideoInputDevices();
+      
+      if (audioDevices.length) await newMeetingSession.audioVideo.startAudioInput(audioDevices[0].deviceId);
+      if (videoDevices.length) await newMeetingSession.audioVideo.startVideoInput(videoDevices[0].deviceId);
 
-            if (audioInputs.length) {
-                await newMeetingSession.audioVideo.startAudioInput(audioInputs[0].deviceId);
-            }
+      newMeetingSession.audioVideo.addObserver({
+        videoTileDidUpdate: handleVideoUpdates,
+      });
 
-            if (videoInputs.length) {
-                await newMeetingSession.audioVideo.startVideoInput(videoInputs[0].deviceId);
-            }
+      newMeetingSession.audioVideo.realtimeSubscribeToAttendeeIdPresence(attendeeObserver);
+      newMeetingSession.audioVideo.start();
+      newMeetingSession.audioVideo.startLocalVideoTile();
 
-            newMeetingSession.audioVideo.addObserver({ videoTileDidUpdate: updateTiles });
-            newMeetingSession.audioVideo.realtimeSubscribeToAttendeeIdPresence(attendeeObserver);
+      setResponse('Meeting started');
+      
+      // Capture and display the shareable link from backend response
+      setShareableLink(data.Info.ShareableLink);
+    } catch (error) {
+      console.error('Error joining meeting:', error);
+      alert('An unexpected error occurred');
+    }
+  };
 
-            newMeetingSession.audioVideo.start();
-            newMeetingSession.audioVideo.startLocalVideoTile();
+  const cleanupMeeting = () => {
+    if (meetingSession) {
+      meetingSession.audioVideo.stopLocalVideoTile();
+      meetingSession.audioVideo.realtimeUnsubscribeToAttendeeIdPresence(attendeeObserver);
+      meetingSession.audioVideo.stop();
+      setMeetingSession(null);
+    }
 
-            setResponse('Meeting started successfully');
-        } catch (err) {
-            console.error('Error starting meeting:', err);
-            alert('Failed to start the meeting. Please check the console for details.');
-        }
-    };
+    setResponse('');
+    document.getElementById('video-list')?.replaceChildren();
+    setAttendees(new Set());
+  };
 
-    const cleanup = () => {
-        if (meetingSession) {
-            meetingSession.audioVideo.stopLocalVideoTile();
-            meetingSession.audioVideo.realtimeUnsubscribeToAttendeeIdPresence(attendeeObserver);
-            meetingSession.audioVideo.stop();
-            setMeetingSession(null);
-        }
-        setMeetingId('');
-        setResponse('');
-        setAttendees(new Set());
-        document.getElementById('video-list')?.replaceChildren();
-    };
+  useEffect(() => {
+    return () => cleanupMeeting();
+  }, []);
 
-    return (
-        <div style={{ fontFamily: 'Arial, sans-serif', textAlign: 'center', marginTop: '50px' }}>
-            <h1>Chime Video Call Demo</h1>
-            <div>
-                <input
-                    type="text"
-                    placeholder="Enter your name"
-                    value={userName}
-                    onChange={(e) => setUserName(e.target.value)}
-                />
-                <button onClick={doMeeting}>Start/Join Meeting</button>
-                <button onClick={cleanup}>End Meeting</button>
-            </div>
-            <pre>{response}</pre>
-            <div id="video-list" style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }} />
-            <p>Attendees: {Array.from(attendees).join(', ')}</p>
+  return (
+    <div style={{ fontFamily: 'Arial, sans-serif', textAlign: 'center', marginTop: '50px' }}>
+      <h1>Amazon Chime SDK Demo</h1>
+      <div>
+        <input
+          type="text"
+          value={userName}
+          onChange={(e) => setUserName(e.target.value)}
+          placeholder="Enter your name"
+          style={{ marginBottom: '10px', padding: '5px' }}
+        />
+        <br />
+        <button onClick={joinMeeting} style={{ marginRight: '10px' }}>
+          Start Meeting & Share Link
+        </button>
+        <button onClick={cleanupMeeting}>Leave Meeting</button>
+      </div>
+      <p style={{ marginTop: '10px' }}>{response}</p>
+
+      {/* Shareable Meeting Link Section */}
+      {shareableLink && (
+        <div style={{ marginTop: '20px' }}>
+          <p>Share this link with others to join the meeting:</p>
+          <a href={shareableLink} target="_blank" rel="noopener noreferrer" style={{ color: '#007bff' }}>
+            {shareableLink}
+          </a>
         </div>
-    );
+      )}
+
+      <div id="video-list" style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }} />
+      <div style={{ marginTop: '20px' }}>
+        <strong>Current Attendees:</strong> {Array.from(attendees).join(', ')}
+      </div>
+    </div>
+  );
 };
 
-export default Chimedemo;
+export default ChimeDemo;
