@@ -45,58 +45,66 @@ const ChimeDemo = () => {
     });
   };
 
-  // Logic for joining meeting
   const joinMeeting = async () => {
     if (!userName.trim()) {
       alert('Please enter your name');
       return;
     }
-
+  
     if (userName.includes('#')) {
       alert('Special characters like # are not allowed');
       return;
     }
-
+  
+    let meetingIdFromURL = new URLSearchParams(window.location.search).get('meetingId') || '';
+  
     try {
-      const response = await fetch('https://yjfs7k6xp9.execute-api.us-east-1.amazonaws.com/dev/meetings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'DO_MEETING', USERNAME: userName }),
-      });
-
+      const response = await fetch(
+        'https://yjfs7k6xp9.execute-api.us-east-1.amazonaws.com/dev/meetings',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'DO_MEETING',
+            USERNAME: userName,
+            MEETING_ID: meetingIdFromURL,
+          }),
+        }
+      );
+  
       const data = await response.json();
       if (!data?.Info) {
         alert('Failed to initialize meeting');
         return;
       }
-
+  
       const sessionConfig = new ChimeSDK.MeetingSessionConfiguration(
         data.Info.Meeting.Meeting,
         data.Info.Attendee.Attendee
       );
-
+  
       const newMeetingSession = new ChimeSDK.DefaultMeetingSession(
         sessionConfig,
         logger,
         deviceController
       );
-
+  
       setMeetingSession(newMeetingSession);
-
+  
       const audioDevices = await newMeetingSession.audioVideo.listAudioInputDevices();
       const videoDevices = await newMeetingSession.audioVideo.listVideoInputDevices();
-
+  
       if (audioDevices.length) await newMeetingSession.audioVideo.startAudioInput(audioDevices[0].deviceId);
       if (videoDevices.length) await newMeetingSession.audioVideo.startVideoInput(videoDevices[0].deviceId);
-
+  
       newMeetingSession.audioVideo.addObserver({
         videoTileDidUpdate: handleVideoUpdates,
       });
-
+  
       newMeetingSession.audioVideo.realtimeSubscribeToAttendeeIdPresence(attendeeObserver);
       newMeetingSession.audioVideo.start();
       newMeetingSession.audioVideo.startLocalVideoTile();
-
+  
       setResponse('Meeting started');
       setShareableLink(data.Info.ShareableLink);
     } catch (error) {
@@ -104,6 +112,7 @@ const ChimeDemo = () => {
       alert('An unexpected error occurred');
     }
   };
+  
 
   const cleanupMeeting = () => {
     if (meetingSession) {
