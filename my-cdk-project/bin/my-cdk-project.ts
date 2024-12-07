@@ -4,6 +4,7 @@ import * as cdk from 'aws-cdk-lib';
 import { MyCdkProjectStack } from '../lib/my-cdk-project-stack';
 import { S3BucketStack } from '../lib/s3-bucket-stack';
 import { RestApiAwsStack } from '../lib/rest-api-aws-stack';
+import { EventbridgeSchedulerStack } from '../lib/lambda-scheduler-stack';
 
 const app = new cdk.App();
 //new MyCdkProjectStack(app, 'MyCdkProjectStack');
@@ -22,6 +23,8 @@ const rest_api_aws_stack = new RestApiAwsStack(app,"restApiStack", {
     region: process.env.CDK_DEFAULT_REGION,
   },
 });
+
+const lambda_scheduler_stack = new EventbridgeSchedulerStack(app,"eventBridgeStack")
 //reusing assets
 // const bucket = s3_bucket_stack.bucket;
 // const restApi = rest_api_aws_stack.;
