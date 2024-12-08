@@ -5,6 +5,10 @@ import { MyCdkProjectStack } from '../lib/my-cdk-project-stack';
 import { S3BucketStack } from '../lib/s3-bucket-stack';
 import { RestApiAwsStack } from '../lib/rest-api-aws-stack';
 import { EventbridgeSchedulerStack } from '../lib/lambda-scheduler-stack';
+import { SnsEmailSubscriptionStack } from '../lib/sns-subscription-stack';
+import { SesEmailsStack } from '../lib/ses-email-stack';
+import { SesEmailsReminderStack } from '../lib/ses-email-reminder-stack';
+import { stackProps } from '../props';
 
 const app = new cdk.App();
 //new MyCdkProjectStack(app, 'MyCdkProjectStack');
@@ -24,7 +28,20 @@ const rest_api_aws_stack = new RestApiAwsStack(app,"restApiStack", {
   },
 });
 
-const lambda_scheduler_stack = new EventbridgeSchedulerStack(app,"eventBridgeStack")
+const lambda_scheduler_stack = new EventbridgeSchedulerStack(app,"eventBridgeStack",{
+  env: {
+    account: process.env.CDK_DEFAULT_ACCOUNT,
+    region: process.env.CDK_DEFAULT_REGION,
+  },
+});
+
+const sns_subscription_stack = new SnsEmailSubscriptionStack(app, 'SnsEmailSubscriptionStack');
+
+const ses_email_stack = new SesEmailsStack(app,'sesEmailStack',stackProps)
+
+const ses_email_reminder_stach = new SesEmailsReminderStack(app,'sesEmailReminderStack',stackProps)
+
+
 //reusing assets
 // const bucket = s3_bucket_stack.bucket;
 // const restApi = rest_api_aws_stack.;

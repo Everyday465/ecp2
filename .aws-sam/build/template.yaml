@@ -1,0 +1,15 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Resources:
+  MyLambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Handler: functions/create-schedule-lambda.create-schedule-lambda.handler
+      Role: arn:aws:iam::058264429730:role/LambdaEventBridgeRole
+      FunctionName: lambda-schedule
+      Runtime: nodejs18.x
+      CodeUri: ./src
+      MemorySize: 128
+      Timeout: 100
+      Code: MyLambdaFunction
+    Metadata:
+      SamResourceId: MyLambdaFunction
