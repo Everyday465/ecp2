@@ -1,4 +1,3 @@
-import axios from 'axios';
 import { useState } from 'react';
 
 const Appointment = () => {
@@ -8,7 +7,7 @@ const Appointment = () => {
   const apiUrl5 = 'https://ngkn80fdo9.execute-api.us-east-1.amazonaws.com/prod/lambdaA';
 
   const [loading, setLoading] = useState(false);
-  const [loading2, setLoading2] = useState(false);
+  //const [loading2, setLoading2] = useState(false);
   const [loading3, setLoading3] = useState(false);
 
   //send email with sample
