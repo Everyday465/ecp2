@@ -6,19 +6,11 @@ import * as s3notifications from 'aws-cdk-lib/aws-s3-notifications';
 import * as iam from 'aws-cdk-lib/aws-iam';
 
 export class S3TranscriptionStack extends cdk.Stack {
-  public readonly bucket: s3.Bucket;
-
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    // Create the S3 bucket without versioning
-    this.bucket = new s3.Bucket(this, "EcpprojTestTestUpdated", {
-      versioned: false,
-      bucketName: "ecpprojtesttestupdated",
-      publicReadAccess: false,
-      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
-      removalPolicy: cdk.RemovalPolicy.DESTROY
-    });
+    // Import the existing S3 bucket using the bucket name
+    const bucket = s3.Bucket.fromBucketName(this, 'ImportedBucket', 'testamplifybucket467c6-dev');
 
     // Create IAM roles for Lambda functions
     const lambdatranscribeRole = new iam.Role(this, 'LambdaTranscribeRole', {
@@ -45,67 +37,67 @@ export class S3TranscriptionStack extends cdk.Stack {
       runtime: lambda.Runtime.PYTHON_3_13,
       handler: 'index.lambda_handler',
       code: lambda.Code.fromInline(`
-  import boto3
-  import json
-  import uuid
-  import os
+import boto3
+import json
+import uuid
+import os
 
-  def lambda_handler(event, context):
-      print(json.dumps(event))
-      
-      record = event['Records'][0]
-      
-      s3bucket = record['s3']['bucket']['name']
-      s3object = record['s3']['object']['key']
-      
-      # Remove the 'uploadfiles/' part from the object key to use only the file name
-      file_name = s3object.rsplit('/', 1)[-1]
-      
-      # Full S3 path of the uploaded file
-      s3Path = f"s3://{s3bucket}/{s3object}"
-      
-      # Generate a unique transcription job name using the file name without the folder part
-      jobName = f"{file_name}-{str(uuid.uuid4())}"
-      
-      # Output path for the transcription results
-      outputFolder = "transcripted-jobs"
-      outputKey = f"{outputFolder}/{file_name.rsplit('.', 1)[0]}.json"  # Save as JSON
-      
-      # Extract file extension (e.g., mp4, mp3, etc.)
-      file_extension = file_name.rsplit('.', 1)[-1].lower()
-      
-      # Define the MediaFormat based on the file extension
-      if file_extension in ['mp4', 'mov']:
-          media_format = 'mp4'
-      elif file_extension in ['mp3', 'ogg', 'flac']:
-          media_format = 'ogg'
-      else:
-          media_format = 'mp4'  # Default to mp4 if unknown format
-      
-      client = boto3.client('transcribe')
-      
-      try:
-          response = client.start_transcription_job(
-              TranscriptionJobName=jobName,
-              LanguageCode='en-US',
-              MediaFormat=media_format,  # Use dynamic media format based on the file extension
-              Media={
-                  'MediaFileUri': s3Path
-              },
-              OutputBucketName=s3bucket,  # Specify the same bucket
-              OutputKey=outputKey         # Custom output folder and file name
-          )
-          
-          print(json.dumps(response, default=str))
-          
-          return {
-              'TranscriptionJobName': response['TranscriptionJob']['TranscriptionJobName'],
-              'OutputLocation': f"s3://{s3bucket}/{outputKey}"
-          }
-      except Exception as e:
-          print(f"Error: {e}")
-          raise
-      `),
+def lambda_handler(event, context):
+    print(json.dumps(event))
+    
+    record = event['Records'][0]
+    
+    s3bucket = record['s3']['bucket']['name']
+    s3object = record['s3']['object']['key']
+    
+    # Remove the 'public/' part from the object key to use only the file name
+    file_name = s3object.rsplit('/', 1)[-1]
+    
+    # Full S3 path of the uploaded file
+    s3Path = f"s3://{s3bucket}/{s3object}"
+    
+    # Generate a unique transcription job name using the file name without the folder part
+    jobName = f"{file_name}-{str(uuid.uuid4())}"
+    
+    # Output path for the transcription results
+    outputFolder = "transcripted-jobs"
+    outputKey = f"{outputFolder}/{file_name.rsplit('.', 1)[0]}.json"  # Save as JSON
+    
+    # Extract file extension (e.g., mp4, mp3, etc.)
+    file_extension = file_name.rsplit('.', 1)[-1].lower()
+    
+    # Define the MediaFormat based on the file extension
+    if file_extension in ['mp4', 'mov']:
+        media_format = 'mp4'
+    elif file_extension in ['mp3', 'ogg', 'flac']:
+        media_format = 'ogg'
+    else:
+        media_format = 'mp4'  # Default to mp4 if unknown format
+    
+    client = boto3.client('transcribe')
+    
+    try:
+        response = client.start_transcription_job(
+            TranscriptionJobName=jobName,
+            LanguageCode='en-US',
+            MediaFormat=media_format,  # Use dynamic media format based on the file extension
+            Media={
+                'MediaFileUri': s3Path
+            },
+            OutputBucketName=s3bucket,  # Specify the same bucket
+            OutputKey=outputKey         # Custom output folder and file name
+        )
+        
+        print(json.dumps(response, default=str))
+        
+        return {
+            'TranscriptionJobName': response['TranscriptionJob']['TranscriptionJobName'],
+            'OutputLocation': f"s3://{s3bucket}/{outputKey}"
+        }
+    except Exception as e:
+        print(f"Error: {e}")
+        raise
+`),
       role: lambdatranscribeRole // Assign IAM role here
     });
 
@@ -181,18 +173,18 @@ def lambda_handler(event, context):
         # Handle errors and log them
         print(f"Error processing file {file_name}: {str(e)}")
         return f"Error processing file: {str(e)}"
-      `),
+`),
       role: lambdareads3Role // Assign IAM role here
     });
 
-    // Add event notifications for S3 bucket
-    this.bucket.addEventNotification(
+    // Add event notifications for the existing S3 bucket
+    bucket.addEventNotification(
       s3.EventType.OBJECT_CREATED,
       new s3notifications.LambdaDestination(lambdatranscribe),
-      { prefix: 'uploadfiles/' }
+      { prefix: 'public/' }  // Changed from 'uploadfiles/' to 'public/'
     );
 
-    this.bucket.addEventNotification(
+    bucket.addEventNotification(
       s3.EventType.OBJECT_CREATED,
       new s3notifications.LambdaDestination(lambdareads3),
       { prefix: 'transcripted-jobs/' }

@@ -34,8 +34,8 @@ const homepage = () => {
             <button className="btn2" onClick={() => navigate('/chimedemo')}>
                 Go to Chimedemo
             </button>
-            <button className="btn3" onClick={() => alert('Button 3 clicked!')}>
-                Button 3
+            <button className="btn3" onClick={() => navigate('/upload')}>
+                Upload a file to s3
             </button>
             <pre id="responseMessage">{response}</pre>
         </div>
