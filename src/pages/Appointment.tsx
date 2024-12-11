@@ -5,8 +5,8 @@ const Appointment = () => {
   const apiUrl5 = 'https://ngkn80fdo9.execute-api.us-east-1.amazonaws.com/prod/lambdaA';
   const apiUrl6 = 'https://ngkn80fdo9.execute-api.us-east-1.amazonaws.com/prod/posts';
 
-  const [loading, setLoading] = useState(false);
-  const [loading3, setLoading3] = useState(false);
+  // const [loading, setLoading] = useState(false);
+  // const [loading3, setLoading3] = useState(false);
   const [loading4, setLoading4] = useState(false);
 
   // State to capture user input for appointment details
@@ -108,61 +108,61 @@ const Appointment = () => {
     }
   };
 
-  const sendEmail = async () => {
-    const payload = { ...formData }; // Build payload from form data
+  // const sendEmail = async () => {
+  //   const payload = { ...formData }; // Build payload from form data
 
-    setLoading(true);  // Start loading
+  //   setLoading(true);  // Start loading
 
-    try {
-      const response = await fetch(apiUrl2, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-      });
+  //   try {
+  //     const response = await fetch(apiUrl2, {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       body: JSON.stringify(payload),
+  //     });
 
-      const data = await response.json();
-      if (response.ok) {
-        alert('Email sent successfully!');
-      } else {
-        alert('Failed to send email: ' + data.error);
-      }
-    } catch (error) {
-      console.error('Error sending email:', error);
-      alert('Error: Failed to send email.');
-    } finally {
-      setLoading(false);  // Stop loading
-    }
-  };
+  //     const data = await response.json();
+  //     if (response.ok) {
+  //       alert('Email sent successfully!');
+  //     } else {
+  //       alert('Failed to send email: ' + data.error);
+  //     }
+  //   } catch (error) {
+  //     console.error('Error sending email:', error);
+  //     alert('Error: Failed to send email.');
+  //   } finally {
+  //     setLoading(false);  // Stop loading
+  //   }
+  // };
 
-  const sendReminderEmail2 = async () => {
-    const payload = { ...formData }; // Build payload from form data
+  // const sendReminderEmail2 = async () => {
+  //   const payload = { ...formData }; // Build payload from form data
 
-    setLoading3(true);  // Start loading
+  //   setLoading3(true);  // Start loading
 
-    try {
-      const response = await fetch(apiUrl5, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-      });
+  //   try {
+  //     const response = await fetch(apiUrl5, {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       body: JSON.stringify(payload),
+  //     });
 
-      const data = await response.json();
-      if (response.ok) {
-        alert('Reminder Email will be sent 5mins before schedule from now!');
-      } else {
-        alert('Failed to send email: ' + data.error);
-      }
-    } catch (error) {
-      console.error('Error sending email:', error);
-      alert('Error: Failed to send email.');
-    } finally {
-      setLoading3(false);  // Stop loading
-    }
-  };
+  //     const data = await response.json();
+  //     if (response.ok) {
+  //       alert('Reminder Email will be sent 5mins before schedule from now!');
+  //     } else {
+  //       alert('Failed to send email: ' + data.error);
+  //     }
+  //   } catch (error) {
+  //     console.error('Error sending email:', error);
+  //     alert('Error: Failed to send email.');
+  //   } finally {
+  //     setLoading3(false);  // Stop loading
+  //   }
+  // };
 
   return (
     <div style={{ fontFamily: 'Arial, sans-serif', textAlign: 'center', marginTop: '50px' }}>
