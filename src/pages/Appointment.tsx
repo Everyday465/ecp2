@@ -1,15 +1,22 @@
 import { useState } from 'react';
+import { Layout, Menu, Breadcrumb, Form, Input, DatePicker, Select, Button, theme, Space, Typography } from 'antd';
+
+const { Header, Footer, Content } = Layout;
+const { Title, Text } = Typography;
+
+
+const items = new Array(3).fill(null).map((_, index) => ({
+  key: String(index + 1),
+  label: `nav ${index + 1}`,
+}));
 
 const Appointment = () => {
   const apiUrl2 = 'https://ngkn80fdo9.execute-api.us-east-1.amazonaws.com/prod/ses-sender-function';
   const apiUrl5 = 'https://ngkn80fdo9.execute-api.us-east-1.amazonaws.com/prod/lambdaA';
   const apiUrl6 = 'https://ngkn80fdo9.execute-api.us-east-1.amazonaws.com/prod/posts';
 
-  // const [loading, setLoading] = useState(false);
-  // const [loading3, setLoading3] = useState(false);
   const [loading4, setLoading4] = useState(false);
 
-  // State to capture user input for appointment details
   const [formData, setFormData] = useState({
     id: 'test',
     title: '',
@@ -20,28 +27,43 @@ const Appointment = () => {
     receiver: '',
   });
 
-  // State to store saved information
   const [savedData, setSavedData] = useState('');
 
-  // Handle input changes
-  const handleInputChange = (e: { target: { name: any; value: any; }; }) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
+  const handleInputChange = (changedValues: any) => {
+  const therapistEmailMap: Record<string, string> ={
+    Ben: 'whoisyoutueber@gmail.com',
+    John: 'agnotestorage1@gmail.com',
+    Jake: 'agnoteelijah@gmail.com',
   };
 
-  // Save input data
+  if (changedValues.therapist) {
+    setFormData({
+      ...formData,
+      therapist: changedValues.therapist,
+      receiver: therapistEmailMap[changedValues.therapist] || '',
+    });
+  } else if (changedValues.scheduleDate) {
+    const date = changedValues.scheduleDate.format("YYYY-MM-DDTHH:mm"); // Format without time zone
+    setFormData({
+      ...formData,
+      scheduleDate: date,
+    });
+  } else {
+    setFormData({
+      ...formData,
+      ...changedValues,
+    });
+  }
+};
+
   const saveInputData = () => {
-    setSavedData(JSON.stringify(formData, null, 2)); // Save the data in a formatted JSON string
+    setSavedData(JSON.stringify(formData, null, 2));
   };
 
   const sendPost = async () => {
-    const payload = { ...formData }; // Build payload from form data
+    const payload = { ...formData };
 
-    setLoading4(true);  // Start loading
-    
+    setLoading4(true);
     try {
       const response = await fetch(apiUrl6, {
         method: 'POST',
@@ -62,10 +84,9 @@ const Appointment = () => {
       console.error('Error scheduling appointment:', error);
       alert('Error: Failed to schedule appointment.');
     } finally {
-      setLoading4(false);  // Stop loading
+      setLoading4(false);
     }
 
-    //send email notification
     try {
       const response = await fetch(apiUrl2, {
         method: 'POST',
@@ -76,9 +97,7 @@ const Appointment = () => {
       });
 
       const data = await response.json();
-      if (response.ok) {
-        //alert('Email sent successfully!');
-      } else {
+      if (!response.ok) {
         alert('Failed to send email: ' + data.error);
       }
     } catch (error) {
@@ -86,7 +105,6 @@ const Appointment = () => {
       alert('Error: Failed to send email.');
     }
 
-    //schedule reminder
     try {
       const response = await fetch(apiUrl5, {
         method: 'POST',
@@ -97,177 +115,118 @@ const Appointment = () => {
       });
 
       const data = await response.json();
-      if (response.ok) {
-        //alert('Reminder Email will be sent 5mins before schedule from now!');
-      } else {
-        alert('Failed to send email: ' + data.error);
+      if (!response.ok) {
+        alert('Failed to send reminder: ' + data.error);
       }
     } catch (error) {
-      console.error('Error sending email:', error);
-      alert('Error: Failed to send email.');
+      console.error('Error sending reminder:', error);
+      alert('Error: Failed to send reminder.');
     }
   };
 
-  // const sendEmail = async () => {
-  //   const payload = { ...formData }; // Build payload from form data
+  const {
+    token: { colorBgContainer, borderRadiusLG },
+  } = theme.useToken();
 
-  //   setLoading(true);  // Start loading
-
-  //   try {
-  //     const response = await fetch(apiUrl2, {
-  //       method: 'POST',
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //       },
-  //       body: JSON.stringify(payload),
-  //     });
-
-  //     const data = await response.json();
-  //     if (response.ok) {
-  //       alert('Email sent successfully!');
-  //     } else {
-  //       alert('Failed to send email: ' + data.error);
-  //     }
-  //   } catch (error) {
-  //     console.error('Error sending email:', error);
-  //     alert('Error: Failed to send email.');
-  //   } finally {
-  //     setLoading(false);  // Stop loading
-  //   }
-  // };
-
-  // const sendReminderEmail2 = async () => {
-  //   const payload = { ...formData }; // Build payload from form data
-
-  //   setLoading3(true);  // Start loading
-
-  //   try {
-  //     const response = await fetch(apiUrl5, {
-  //       method: 'POST',
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //       },
-  //       body: JSON.stringify(payload),
-  //     });
-
-  //     const data = await response.json();
-  //     if (response.ok) {
-  //       alert('Reminder Email will be sent 5mins before schedule from now!');
-  //     } else {
-  //       alert('Failed to send email: ' + data.error);
-  //     }
-  //   } catch (error) {
-  //     console.error('Error sending email:', error);
-  //     alert('Error: Failed to send email.');
-  //   } finally {
-  //     setLoading3(false);  // Stop loading
-  //   }
-  // };
 
   return (
-    <div style={{ fontFamily: 'Arial, sans-serif', textAlign: 'center', marginTop: '50px' }}>
-      <h1>Welcome to the Simple Website</h1>
+    <Layout>
+      <Header
+        style={{
+          position: 'sticky',
+          top: 0,
+          zIndex: 1,
+          width: '100%',
+          display: 'flex',
+          alignItems: 'center',
+        }}
+      >
+        <Menu theme="dark" mode="horizontal" defaultSelectedKeys={['1']} items={items} style={{ flex: 1 }} />
+      </Header>
+      <Content style={{ padding: '0 48px' }}>
+        <Breadcrumb style={{ margin: '16px 0' }}>
+          <Breadcrumb.Item>Home</Breadcrumb.Item>
+          <Breadcrumb.Item>Schedule Appointment</Breadcrumb.Item>
+        </Breadcrumb>
 
-      <div>
-      <div
-  style={{
-    display: 'flex',
-    flexDirection: 'column',  // Stack elements vertically
-    alignItems: 'center',     // Center the div horizontally
-    justifyContent: 'center', // Center content vertically
-    fontFamily: 'monospace',
-    marginTop: '20px',
-  }}
->
-  {/* Form for user input */}
-  <label style={{ alignSelf: 'flex-end', fontSize: '14px', marginBottom: '8px' }}>
-    Title:
-    <input
-      type="text"
-      name="title"
-      value={formData.title}
-      onChange={handleInputChange}
-      style={{ width: '300px', marginLeft: '10px' }} // Adjust width to match
-    />
-  </label>
-  <br />
-  <label style={{ alignSelf: 'flex-end', fontSize: '14px', marginBottom: '8px' }}>
-    Schedule Date:
-    <input
-      type="datetime-local"
-      name="scheduleDate"
-      value={formData.scheduleDate}
-      onChange={handleInputChange}
-      style={{ width: '300px', marginLeft: '10px' }} // Adjust width to match
-    />
-  </label>
-  <br />
-  <label style={{ alignSelf: 'flex-end', fontSize: '14px', marginBottom: '8px' }}>
-    Customer:
-    <input
-      type="text"
-      name="customer"
-      value={formData.customer}
-      onChange={handleInputChange}
-      style={{ width: '300px', marginLeft: '10px' }} // Adjust width to match
-    />
-  </label>
-  <br />
-  <label style={{ alignSelf: 'flex-end', fontSize: '14px', marginBottom: '8px' }}>
-    Therapist:
-    <input
-      type="text"
-      name="therapist"
-      value={formData.therapist}
-      onChange={handleInputChange}
-      style={{ width: '300px', marginLeft: '10px' }} // Adjust width to match
-    />
-  </label>
-  <br />
-  <label style={{ alignSelf: 'flex-end', fontSize: '14px', marginBottom: '8px' }}>
-    Receiver Email:
-    <input
-      type="email"
-      name="receiver"
-      value={formData.receiver}
-      onChange={handleInputChange}
-      style={{ width: '300px', marginLeft: '10px' }} // Adjust width to match
-    />
-  </label>
-  <br />
-</div>
+        <div
+          style={{
+            padding: 24,
+            minHeight: 380,
+            background: colorBgContainer,
+            borderRadius: borderRadiusLG,
+          }}
+        >
+          <Title level={3} style={{ textAlign: 'center' }}>
+            Schedule Appointment
+          </Title>
 
+          <Form
+            labelCol={{ span: 6 }}
+            wrapperCol={{ span: 14 }}
+            layout="horizontal"
+            initialValues={formData}
+            onValuesChange={handleInputChange}
+            style={{ maxWidth: 600, margin: '0 auto' }}
+          >
+            <Form.Item label="Title" name="title">
+              <Input />
+            </Form.Item>
 
-        
+            <Form.Item label="Schedule Date" name="scheduleDate">
+              <DatePicker
+                format="YYYY-MM-DDTHH:mm"
+                showTime={{ format: 'HH:mm' }}
+                inputReadOnly/>
+            </Form.Item>
 
-        {/* Button to Save Input */}
-        <button onClick={saveInputData}>Save Information</button>
-        <br />
-        
-        {/* Display saved information */}
-        <textarea
-          value={savedData}
-          rows={6}
-          cols={50}
-          readOnly
-          style={{ marginTop: '20px', fontFamily: 'monospace' }}
-        />
-        <br />
+            <Form.Item label="Customer" name="customer">
+              <Input />
+            </Form.Item>
 
-        {/* Button to Schedule Appointment */}
-        <button onClick={sendPost} disabled={loading4}>
-          {loading4 ? 'Sending...' : 'Schedule Appointment'}
-        </button>
+            <Form.Item label="Therapist" name="therapist">
+              <Select>
+                <Select.Option value="Ben">Ben</Select.Option>
+                <Select.Option value="John">John</Select.Option>
+                <Select.Option value="Jake">Jake</Select.Option>
+              </Select>
+            </Form.Item>
 
-        {/* <button onClick={sendEmail} disabled={loading}>
-          {loading ? 'Sending...' : 'Send Appointment Email'}
-        </button>
+            <Form.Item label="Receiver Email" name="receiver">
+  <Input type="email" disabled value={formData.receiver} />
+</Form.Item>
 
-        <button onClick={sendReminderEmail2} disabled={loading3}>
-          {loading3 ? 'Sending...' : 'Send Reminder Appointment Email(lambdaA)'}
-        </button> */}
-      </div>
-    </div>
+            <Form.Item wrapperCol={{ span: 14, offset: 6 }}>
+              <Space>
+                <Button type="primary" onClick={saveInputData}>
+                  Save Information
+                </Button>
+                <Button type="primary" onClick={sendPost} loading={loading4}>
+                  Schedule Appointment
+                </Button>
+              </Space>
+            </Form.Item>
+          </Form>
+
+          <div style={{ marginTop: 20, textAlign: 'center' }}>
+            <Text>Saved Information:</Text>
+            <pre
+              style={{
+                background: '#f5f5f5',
+                padding: '10px',
+                borderRadius: '5px',
+                marginTop: '10px',
+              }}
+            >
+              {savedData || 'No data saved yet.'}
+            </pre>
+          </div>
+        </div>
+      </Content>
+      <Footer style={{ textAlign: 'center' }}>
+        Ant Design ©{new Date().getFullYear()} Created by Ant UED
+      </Footer>
+    </Layout>
   );
 };
 
