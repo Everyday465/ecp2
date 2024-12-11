@@ -14,6 +14,11 @@ export async function create(body: string | null) {
   if (!body) {
     return {
       statusCode: 400,
+      headers: {
+        'Access-Control-Allow-Origin': '*', // Allow all origins or specify a domain
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS', // Allowed methods
+        'Access-Control-Allow-Headers': 'Content-Type, x-api-key', // Allowed headers
+      },
       body: JSON.stringify({ message: 'Missing body' }),
     };
   }
@@ -34,6 +39,11 @@ export async function create(body: string | null) {
 
   return {
     statusCode: 200,
+    headers: {
+      'Access-Control-Allow-Origin': '*', // Allow all origins or specify a domain
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS', // Allowed methods
+      'Access-Control-Allow-Headers': 'Content-Type, x-api-key', // Allowed headers
+    },
     body: JSON.stringify({ message: 'Post created' }),
   };
 }

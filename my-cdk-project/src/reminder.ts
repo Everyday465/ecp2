@@ -15,19 +15,19 @@ export const handler = async (event: IEmailReminderEvent) => {
     ReplyToAddresses: ['agnoteelijah@gmail.com'],
     Content: {
         Simple: {
-        Subject: {Data: 'Reminder! You have an appointment in 5 mins' },
+        Subject: {Data: 'Reminder! You have an appointment in 1 mins' },
         Body: {
             Html: {
                 Charset: 'UTF-8',
                 Data: EmailWrapper(
                     AppointmentEmail(
                         {
-                            id: "test1",
-                            title: "appointment",
-                            orderDate: "2024-12-07T09:35:37",
-                            scheduleDate: "2024-12-07T09:35:37",
-                            customer: "john",
-                            therapist: "ben", 
+                            id:event.id,
+                            title:event.title,
+                            orderDate: event.orderDate,
+                            scheduleDate: event.scheduleDate,
+                            customer: event.customer,
+                            therapist: event.therapist,
 
                     }
                 )
